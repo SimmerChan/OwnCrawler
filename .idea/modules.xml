@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/OwnCrawler.iml" filepath="$PROJECT_DIR$/.idea/OwnCrawler.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../dirbot-master/.idea/dirbot-master.iml" filepath="$PROJECT_DIR$/../dirbot-master/.idea/dirbot-master.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../scrapy-cluster-master/.idea/scrapy-cluster-master.iml" filepath="$PROJECT_DIR$/../scrapy-cluster-master/.idea/scrapy-cluster-master.iml" />
+    </modules>
+  </component>
+</project>
