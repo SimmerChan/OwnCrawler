@@ -17,6 +17,7 @@ class Checker(object):
 
     def check_relevance(self, title, content):
         has_keyword_in_list1 = False
+        kw2_count = 0
 
         for kw1 in Checker.keywords_list1:
             if title.find(kw1) != -1 and content.count(kw1) >= 3:
@@ -28,7 +29,9 @@ class Checker(object):
 
         for kw2 in Checker.keywords_list2:
             if content.find(kw2) != -1:
-                return True
+                kw2_count += content.count(kw2)
+                if kw2_count >= 3:
+                    return True
 
         return False
 
@@ -45,7 +48,7 @@ class Checker(object):
 if __name__ == '__main__':
     my_checker = Checker()
     my_checker.check_all()
-    with open('../log/relevant_num_best.txt', 'a') as f:
+    with open('../log/relevant_num_best_cluster.txt', 'a') as f:
         for info in my_checker.collection.find():
             if info['relevance'] == 'False':
                 f.write(str(my_checker.count) + ' ')
@@ -54,4 +57,4 @@ if __name__ == '__main__':
                 my_checker.count += 1
                 f.write(str(my_checker.count) + ' ')
 
-
+    print my_checker.count

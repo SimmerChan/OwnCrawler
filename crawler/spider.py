@@ -26,10 +26,22 @@ class Spider(object):
             try:
                 new_url_info = self.urlsManager.get_new_url()
                 new_url = new_url_info['url']
-                dom = self.downloader.download(new_url)
-                if dom is None:
+                t = time.time()
+                page_source = self.downloader.download_with_rendering(new_url)
+                # dom = self.downloader.download_without_rendering(new_url)
+                t = time.time() - t
+                if page_source is None:
                     continue
-                new_urls, data = self.parser.parse(new_url, dom)
+                new_urls, data = self.parser.parse(in_url=new_url, page_source=page_source, browser=self.downloader.
+                                                   browser)
+                # new_urls, data = self.parser.parse(in_url=new_url, dom=dom, page_source=None, browser=None)
+                if data is None:
+                    if new_urls is None:
+                        continue
+                    else:
+                        self.urlsManager.add_new_urls(new_urls)
+                        continue
+
                 self.urlsManager.add_new_urls(new_urls)
                 self.container.collect_data(data)
                 self.crawled_urls.append(new_url_info)
@@ -52,34 +64,41 @@ class Spider(object):
                     break
 
                 # Todo save crawling log
-                msg = 'crawl %d : %s,  [%d urls left in queue]\n' % (count, new_url_info, len(self.urlsManager.new_urls))
+                msg = 'crawl %d[%.2f seconds used]: %s,  [%d urls left in queue]\n' % \
+                      (count, t, new_url_info, len(self.urlsManager.new_urls))
                 print msg
                 with open(filename, 'a') as f:
                     f.write(msg)
 
-                with open('..\log\left_len_best.txt', 'a') as m:
+                with open('..\log\left_len_best_cluster.txt', 'a') as m:
                     m.write(str(len(self.urlsManager.new_urls)) + ' ')
 
                 count += 1
             except:
                 traceback.print_exc()
-                print 'crawl failed'
+                print 'crawl failed, url:%s' % new_url
 
 
 if __name__ == '__main__':
     my_spider = Spider()
+
+    # Todo initialize the seeds
     seeds = [{'url': 'http://tibet.news.cn/gdbb/2011-05/27/content_22874841_1.htm', 'value': 3,
               'anchor_text': u'西藏60年文化建设成果综述：文化工程惠及各族群众'},
-             {'url': 'http://www.xizang.gov.cn/index.jhtml', 'value': 1, 'anchor_text': u'西藏自治区人民政府'},
+             {'url': 'http://www.xizang.gov.cn/index.jhtml', 'value': 3, 'anchor_text': u'西藏自治区人民政府'},
              {'url': 'http://www.tibet.cn/2009shipin/news/sp/201102/t20110221_930304.html', 'value': 3,
               'anchor_text': u'2011年西藏进一步扩大新农村建设成果'},
              {'url': 'http://www.tibet.cn/jiaotong_pd/xzlsnjtfz/jkfdzhh/gl/201104/t20110425_1011223.html', 'value': 3,
               'anchor_text': u'西藏交通建设成果显著 农牧民出行更加便利'},
              {'url': 'http://www.xzxw.com/rkz/mswh/201601/t20160114_1034847.html', 'value': 3,
               'anchor_text': u'日喀则基层公安警营文化建设成果文艺汇演'},
-             {'url': 'http://www.vtibet.com/tbch/2016zt/zgmxzgs_7608/ypgj/201601/t20160113_369802.html', 'value': 1,
+             {'url': 'http://www.vtibet.com/tbch/2016zt/zgmxzgs_7608/ypgj/201601/t20160113_369802.html', 'value': 3,
               'anchor_text': u'习近平的西藏情：“藏族和汉族是一家人”'},
              {'url': 'http://info.tibet.cn/newzt/yuanzang/yzcg/200505/t20050531_33920.htm', 'value': 3,
               'anchor_text': u'对口支援西藏经济建设的丰硕成果'}
              ]
+    # Todo start crawling
     my_spider.crawl(seeds)
+
+    # Todo shut the headless browser Phantomjs down after crawling
+    my_spider.downloader.browser.quit()
